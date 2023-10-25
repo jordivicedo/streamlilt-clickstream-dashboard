@@ -116,10 +116,6 @@ while True:
         # Top 10 viewed pages in the last hour
         products_last_hour = StringIO(r.get("products_last_hour"))
         df = pd.read_json(products_last_hour)
-        # df = real_time_df_copy[
-        #    real_time_df_copy["datetime"] > (datetime.datetime.utcnow() - datetime.timedelta(hours=1))]
-        # df = df.groupby(['productId', 'category']).size().reset_index(name='count')
-        # df = df.sort_values(by=['count'], ascending=False).head(10)
         st.dataframe(df, hide_index=True, use_container_width=True)
 
     with placeholder_col22.container():
@@ -132,10 +128,6 @@ while True:
         # Category popularity in the Last Hour
         data = StringIO(r.get("category_popularity"))
         df = pd.read_json(data)
-        # df = real_time_df_copy[
-        #    real_time_df_copy["datetime"] > (datetime.datetime.utcnow() - datetime.timedelta(hours=1))]
-        # df = df.groupby(['category']).size().reset_index(name='count')
-        # df = df.sort_values(by=['count'], ascending=False)
 
         # Draw a pie chart
         fig = px.pie(df, values='count', names='category')
