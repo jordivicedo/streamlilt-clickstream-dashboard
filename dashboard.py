@@ -73,8 +73,9 @@ while True:
         data = StringIO(r.get("last_15_minutes"))
         df = pd.read_json(data)
 
-        # Create a base dataframe with rows for each minute in the last 15 minutes
-        base_df = pd.DataFrame(pd.date_range(end=pd.Timestamp.now(), periods=15, freq='min'), columns=['datetime'])
+        # Create a base dataframe with rows for each minute in the last 15 minutes rounded to the minute
+        round_to_minute = pd.Timestamp.now().floor('min')
+        base_df = pd.DataFrame(pd.date_range(end=round_to_minute, periods=15, freq='min'), columns=['datetime'])
 
         # Then merge the two dataframes by time and fill missing values with 0, so we have a value for each minute
         df = pd.merge(base_df, df, on='datetime', how='left').fillna(0)
@@ -90,7 +91,8 @@ while True:
         df = pd.read_json(sessions)
 
         # Create a base dataframe with rows for each minute in the last 15 minutes
-        base_df = pd.DataFrame(pd.date_range(end=pd.Timestamp.now(), periods=16, freq='30min'), columns=['datetime'])
+        hour = pd.Timestamp.now().floor('h')
+        base_df = pd.DataFrame(pd.date_range(end=hour, periods=16, freq='30min'), columns=['datetime'])
 
         # Then merge the two dataframes by time and fill missing values with 0, so we have a value for each minute
         df = pd.merge(base_df, df, on='datetime', how='left').fillna(0)
