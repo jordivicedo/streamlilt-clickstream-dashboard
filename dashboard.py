@@ -64,7 +64,7 @@ placeholder_raw = st.empty()
 
 # REAL-TIME METRICS SECTION
 # Below we update the charts with the data we receive from Quix in real time.
-# Each 2s Streamlit requests new data from Quix and updates the charts.
+# Each second Streamlit requests new data from Quix (via Redis) and updates the charts.
 # Keep the dashboard layout code before "while" loop, otherwise new elements
 # will be appended on each iteration.
 while True:
@@ -164,5 +164,5 @@ while True:
         real_time_df_copy = pd.read_json(data)
         st.dataframe(real_time_df_copy, hide_index=True)
 
-    # Wait for 2s before asking for new data from Quix
+    # Wait for one second before asking for new data from Quix
     time.sleep(1)
