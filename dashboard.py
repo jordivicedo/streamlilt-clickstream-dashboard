@@ -72,23 +72,42 @@ while True:
         # count visits per minute in the last 15 minutes
         data = StringIO(r.get("last_15_minutes"))
         df = pd.read_json(data)
+
+        # Create a base dataframe with rows for each minute in the last 15 minutes
+        base_df = pd.DataFrame(pd.date_range(end=pd.Timestamp.now(), periods=15, freq='min'), columns=['datetime'])
+
+        # Then merge the two dataframes by time and fill missing values with 0, so we have a value for each minute
+        df = pd.merge(base_df, df, on='datetime', how='left').fillna(0)
+
         fig = px.line(df, x="datetime", y="count", height=310)
         fig.update_xaxes(title_text='Time', tickformat='%H:%M')
-        fig.update_yaxes(title_text='Visits', range=[0, max(df['count'])])  # Set y minimum always 0
+        fig.update_yaxes(title_text='Visits', range=[0, max(1, max(df['count']))])  # Set y minimum always 0
         st.plotly_chart(fig)
 
     with placeholder_col12.container():
         # Sessions in the last 8 hours (segmented by 30 mins)
         sessions = StringIO(r.get("sessions"))
         df = pd.read_json(sessions)
+
+        # Create a base dataframe with rows for each minute in the last 15 minutes
+        base_df = pd.DataFrame(pd.date_range(end=pd.Timestamp.now(), periods=16, freq='30min'), columns=['datetime'])
+
+        # Then merge the two dataframes by time and fill missing values with 0, so we have a value for each minute
+        df = pd.merge(base_df, df, on='datetime', how='left').fillna(0)
+
         fig = px.line(df, x="datetime", y="count", height=310)
         fig.update_xaxes(title_text='Time', tickformat='%H:%M')
-        fig.update_yaxes(title_text='Sessions', range=[0, max(df['count'])])  # Set y minimum always 0
+        fig.update_yaxes(title_text='Sessions', range=[0, max(1, max(df['count']))])  # Set y minimum always 0
         st.plotly_chart(fig, use_container_width=True)
 
     with placeholder_col13.container():
         popularity = StringIO(r.get("device_type_popularity"))
         chart_df = pd.read_json(popularity)
+
+        if chart_df.empty:
+            st.markdown("N/A")
+            continue
+
         fig = px.bar(chart_df, y="Device", x="Percentage", color="Device type", orientation="h", height=270)
         fig.update_layout(
             barmode='stack',
@@ -109,7 +128,6 @@ while True:
         fig.update_xaxes(visible=False, showticklabels=False)
         fig.update_yaxes(visible=False, showticklabels=False)
 
-        st.markdown("")
         st.plotly_chart(fig, use_container_width=True)
 
     with placeholder_col21.container():
@@ -128,6 +146,10 @@ while True:
         # Category popularity in the Last Hour
         data = StringIO(r.get("category_popularity"))
         df = pd.read_json(data)
+
+        if df.empty:
+            st.markdown("N/A")
+            continue
 
         # Draw a pie chart
         fig = px.pie(df, values='count', names='category')
